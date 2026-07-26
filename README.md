@@ -1,4 +1,4 @@
-<img src="assets/logo.png" alt="NukeMCP" width="260">
+<img src="assets/logo.png" alt="NukeMCP" width="280">
 
 [![CI](https://github.com/dgirondi/NukeMCP/actions/workflows/ci.yml/badge.svg)](https://github.com/dgirondi/NukeMCP/actions/workflows/ci.yml)
 [![GitHub release](https://img.shields.io/github/v/release/dgirondi/NukeMCP)](https://github.com/dgirondi/NukeMCP/releases/latest)
