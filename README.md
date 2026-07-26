@@ -3,7 +3,7 @@
 [![CI](https://github.com/dgirondi/NukeMCP/actions/workflows/ci.yml/badge.svg)](https://github.com/dgirondi/NukeMCP/actions/workflows/ci.yml)
 [![GitHub release](https://img.shields.io/github/v/release/dgirondi/NukeMCP)](https://github.com/dgirondi/NukeMCP/releases/latest)
 [![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)](https://docs.python.org/3/)
-[![Nuke](https://img.shields.io/badge/Nuke-17-FDBF32?logo=foundry&logoColor=white)](https://www.foundry.com/products/nuke-family)
+[![Nuke](https://img.shields.io/badge/Nuke-17-FDBF32?logo=nuke&logoColor=white)](https://www.foundry.com/products/nuke-family)
 [![MCP](https://img.shields.io/badge/MCP-compatible-6B46C1)](https://modelcontextprotocol.io)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 
