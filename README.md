@@ -4,7 +4,7 @@
 [![GitHub release](https://img.shields.io/github/v/release/dgirondi/NukeMCP)](https://github.com/dgirondi/NukeMCP/releases/latest)
 [![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)](https://docs.python.org/3/)
 [![Nuke](https://img.shields.io/badge/Nuke-17-FDBF32?logo=nuke&logoColor=white)](https://www.foundry.com/products/nuke-family)
-[![MCP](https://img.shields.io/badge/MCP-compatible-6B46C1)](https://modelcontextprotocol.io)
+[![MCP](https://img.shields.io/badge/MCP-compatible-6B46C1?logo=modelcontextprotocol&logoColor=white)](https://modelcontextprotocol.io)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 
 An MCP (Model Context Protocol) server for inspecting and controlling a running [Nuke](https://www.foundry.com/products/nuke-family) 17 session from any MCP-compatible LLM client (Claude Code, Claude Desktop, and in principle others, since MCP is a standard protocol).
