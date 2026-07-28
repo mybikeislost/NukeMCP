@@ -30,6 +30,11 @@ _NODE_CLASS_ALIASES = {
     "scanline":        "ScanlineRender",
     "lensdistort":     "LensDistortion",
     "text":            "Text2",
+    # Solid colour sources — "Constant" is the real Nuke class name
+    "solidcolor":      "Constant",
+    "solid":           "Constant",
+    "constantclip":    "Constant",
+    "solidcolour":     "Constant",
 }
 
 
@@ -85,7 +90,13 @@ def create_node(params):
     user_knobs = params.get("knobs") or {}
 
     with undo_group("NukeMCP: create_node"):
-        node = nuke.createNode(node_class, inpanel=False)
+        try:
+            node = nuke.createNode(node_class, inpanel=False)
+        except Exception as exc:
+            raise RuntimeError(
+                "could not create node class {!r}: {} -- "
+                "use list_node_classes to discover available classes".format(node_class, exc)
+            )
 
         xpos = params.get("xpos")
         ypos = params.get("ypos")
