@@ -4,6 +4,7 @@ import tempfile
 import nuke
 
 from ..dispatch import register_handler
+from ..nuke_compat import undo_group
 from .graph import _node_summary
 
 # ---------------------------------------------------------------------------
@@ -53,7 +54,13 @@ def _apply_knobs(node, knobs):
             errors[knob_name] = "no such knob"
             continue
         try:
-            knob.setValue(value)
+            if isinstance(value, (list, tuple)):
+                # Multi-component knob (AColor, XY, UV, Scale, etc.):
+                # setValue(v, i) sets one component at a time.
+                for i, v in enumerate(value):
+                    knob.setValue(float(v), i)
+            else:
+                knob.setValue(value)
             applied.append(knob_name)
         except Exception as exc:
             errors[knob_name] = str(exc)
@@ -77,7 +84,7 @@ def create_node(params):
     node_class = _normalize_node_class(params["node_class"])
     user_knobs = params.get("knobs") or {}
 
-    with nuke.UndoGroup("NukeMCP: create_node"):
+    with undo_group("NukeMCP: create_node"):
         node = nuke.createNode(node_class, inpanel=False)
 
         xpos = params.get("xpos")
@@ -121,7 +128,7 @@ def create_node(params):
 @register_handler("set_knob_values")
 def set_knob_values(params):
     node = _require_node(params["node_name"])
-    with nuke.UndoGroup("NukeMCP: set_knob_values"):
+    with undo_group("NukeMCP: set_knob_values"):
         applied, errors = _apply_knobs(node, params.get("knobs"))
     return {"node_name": node.name(), "knobs_applied": applied, "errors": errors}
 
@@ -143,7 +150,7 @@ def connect_nodes(params):
         input_index = 1
         auto_corrected = True
 
-    with nuke.UndoGroup("NukeMCP: connect_nodes"):
+    with undo_group("NukeMCP: connect_nodes"):
         to_node.setInput(input_index, from_node)
 
     result = {"from_node": from_node.name(), "to_node": to_node.name(), "input_index": input_index}
@@ -160,7 +167,7 @@ def connect_nodes(params):
 def delete_node(params):
     node = _require_node(params["node_name"])
     name = node.name()
-    with nuke.UndoGroup("NukeMCP: delete_node"):
+    with undo_group("NukeMCP: delete_node"):
         nuke.delete(node)
     return {"deleted": name}
 
@@ -172,7 +179,7 @@ def duplicate_node(params):
     xpos_offset = int(params.get("xpos_offset", 100))
     ypos_offset = int(params.get("ypos_offset", 0))
 
-    with nuke.UndoGroup("NukeMCP: duplicate_node"):
+    with undo_group("NukeMCP: duplicate_node"):
         # Save current selection; work with a clean slate
         prev_selected = [n for n in nuke.allNodes() if n.isSelected()]
         for n in prev_selected:
@@ -271,7 +278,7 @@ def get_node_default_knobs(params):
     node_class = params["node_class"]
 
     # Run inside an undo group so this transient creation can be undone if needed
-    with nuke.UndoGroup("NukeMCP: get_node_default_knobs"):
+    with undo_group("NukeMCP: get_node_default_knobs"):
         node = nuke.createNode(node_class, inpanel=False)
         try:
             knobs = serialize_all_knobs(node)

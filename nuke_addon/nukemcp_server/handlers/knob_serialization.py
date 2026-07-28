@@ -15,12 +15,30 @@ import nuke
 
 
 def serialize_knob(knob):
+    knob_type = None
     try:
-        value = knob.value()
-    except Exception as exc:
-        return {"value": None, "error": str(exc), "animated": False, "expression": None}
+        knob_type = knob.Class()
+    except Exception:
+        pass
 
-    value = _to_jsonable(value)
+    # Multi-component knobs (AColor_Knob, XY_Knob, UV_Knob, etc.) report
+    # arraySize() > 1. knob.value() returns only the first component for
+    # these, which hides the vector nature entirely. Use getValue(i) instead
+    # to expose all components as a list so the LLM knows the full shape.
+    arr_size = 1
+    try:
+        arr_size = knob.arraySize()
+    except AttributeError:
+        pass
+
+    try:
+        if arr_size > 1:
+            value = [knob.getValue(i) for i in range(arr_size)]
+        else:
+            value = _to_jsonable(knob.value())
+    except Exception as exc:
+        return {"value": None, "error": str(exc), "animated": False,
+                "expression": None, "knob_type": knob_type}
 
     animated = False
     expression = None
@@ -37,7 +55,8 @@ def serialize_knob(knob):
     except (AttributeError, NameError):
         pass  # not every knob subclass supports animation (e.g. Tab_Knob)
 
-    return {"value": value, "animated": animated, "expression": expression}
+    return {"value": value, "animated": animated, "expression": expression,
+            "knob_type": knob_type}
 
 
 def _to_jsonable(value):
