@@ -14,9 +14,63 @@ def register(mcp: FastMCP) -> None:
     ) -> dict:
         """Create a new node in the live Nuke script. The operation is undoable.
 
+        IMPORTANT: Always use exact Nuke class names. Do NOT guess or invent class names —
+        if you are unsure, call list_node_classes first to discover what is available.
+        Using a wrong name produces an error and the node will not be created.
+
+        Common node classes by category:
+
+        Sources / generators:
+          Constant (solid colour — NOT "SolidColor", "ConstantClip" or "Solid"),
+          Read, CheckerBoard, ColorBars, Noise, Ramp
+
+        Color correction:
+          Grade, ColorCorrect, HueCorrect, Saturation, Clamp, Gamma,
+          ColorLookup, Exposure, Invert
+
+        Filter / blur:
+          Blur, Sharpen, Defocus, ZDefocus, Median, Erode, FilterErode,
+          Convolve, Laplacian, Emboss
+
+        Transform / geometry:
+          Transform, Crop, Reformat, Mirror, Flop, Flip, Rotate,
+          CornerPin2D, GridWarp, SplineWarp, LensDistortion
+
+        Merge / composite:
+          Merge2 (NOT "Merge"), Keymix, Copy, Switch, Dissolve,
+          AddMix, Premult, Unpremult
+
+        Matte / keying:
+          Roto, RotoPaint, Keyer, Primatte, IBKColour, IBKGizmo,
+          Keylight, Despill, EdgeBlur
+
+        Channel ops:
+          Shuffle, ShuffleCopy, AddChannels, ChannelMerge, Remove
+
+        3D:
+          Camera2, ScanlineRender, Card, Scene, Project3D,
+          ReadGeo, WriteGeo, TransformGeo, GeomMerge
+
+        Deep:
+          DeepRead, DeepWrite, DeepMerge, DeepColorCorrect, DeepToImage
+
+        Output / viewer:
+          Write, WriteGeo, Viewer
+
+        Aliases accepted (auto-resolved): "merge" → Merge2, "color" → Grade,
+          "gaussian"/"gaussianblur" → Blur, "solidcolor"/"solid"/"constantclip" → Constant,
+          "output" → Write, "input" → Read, "text" → Text2,
+          "premultiply" → Premult, "unpremultiply" → Unpremult,
+          "move"/"position" → Transform, "rectangle"/"cropnode" → Crop,
+          "lensdistort" → LensDistortion, "scanline" → ScanlineRender,
+          "3dmerge"/"geometrymerge" → GeomMerge
+
         Args:
-            node_class: Nuke node class name, e.g. "Blur", "Grade", "Write".
+            node_class: Nuke node class name (see list above). Use list_node_classes
+                        to discover the full set available in this Nuke installation.
             knobs: optional dict of knob name -> value to set immediately after creation.
+                   Multi-component knobs (colour, XY, UV) accept a scalar (broadcast to
+                   all components) or a list/tuple (per-component), e.g. {"color": [1,0,0,1]}.
             xpos, ypos: optional position in the Node Graph.
             inputs: optional list of existing node names to wire into input 0, 1, 2... in order.
         """
@@ -81,9 +135,11 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def list_node_classes(category: str | None = None) -> dict:
-        """List available node classes from the Nodes menu, grouped by category.
+        """List every node class available in this Nuke installation, grouped by menu category.
 
-        Useful for discovering what nodes can be created before calling create_node.
+        Call this before create_node whenever you are unsure of the exact class name.
+        Nuke class names are case-sensitive and must be exact — guessing will produce
+        an error. This tool is the authoritative source; do not invent class names.
 
         Args:
             category: optional category name to filter to, e.g. "Filter" or "Color".
