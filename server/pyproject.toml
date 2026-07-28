@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "nukemcp"
-version = "0.3.1"
+version = "0.3.2"
 description = "MCP server for inspecting and controlling a running Nuke session"
 requires-python = ">=3.10"
 dependencies = [
