@@ -15,6 +15,7 @@ import ctypes
 import nuke
 
 from ..dispatch import register_handler
+from ..nuke_compat import undo_group
 
 # ---------------------------------------------------------------------------
 # Shared layout helpers
@@ -223,7 +224,7 @@ def create_workflow_template(params):
         if connect_to is None:
             raise LookupError("no such node: {!r}".format(connect_name))
 
-    with nuke.UndoGroup("NukeMCP: create_workflow_template ({})".format(template_type)):
+    with undo_group("NukeMCP: create_workflow_template ({})".format(template_type)):
         nodes, bd = builder(root_x, root_y, connect_to, add_bd)
 
     return {

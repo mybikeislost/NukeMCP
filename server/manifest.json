@@ -2,7 +2,7 @@
   "manifest_version": "0.4",
   "name": "nukemcp",
   "display_name": "NukeMCP",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Inspect and control a running Nuke 17 session",
   "long_description": "NukeMCP gives Claude tools to inspect and control a running Nuke 17 session: query and edit the node graph, render, take screenshots, save/open scripts, and run arbitrary Python inside Nuke.\n\nThis extension installs the standalone MCP server only. A separate addon must also be installed inside Nuke itself -- add the NukeMCP repo's `nuke_addon/` directory to your `NUKE_PATH` and start Nuke. See the repo's docs/INSTALL.md for the full addon setup step; without it running, every tool will report a clear connection error.",
   "author": {

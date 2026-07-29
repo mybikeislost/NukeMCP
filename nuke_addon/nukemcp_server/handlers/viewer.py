@@ -1,6 +1,7 @@
 import nuke
 
 from ..dispatch import register_handler
+from ..nuke_compat import undo_group
 
 
 def _active_viewer_node():
@@ -22,7 +23,7 @@ def create_viewer(params):
     xpos = params.get("xpos")
     ypos = params.get("ypos")
 
-    with nuke.UndoGroup("NukeMCP: create_viewer"):
+    with undo_group("NukeMCP: create_viewer"):
         viewer = nuke.createNode("Viewer", inpanel=False)
         if xpos is not None:
             viewer.setXpos(int(xpos))
@@ -87,7 +88,7 @@ def set_viewer_input(params):
     if viewer is None:
         raise RuntimeError("no Viewer node exists in the script")
 
-    with nuke.UndoGroup("NukeMCP: set_viewer_input"):
+    with undo_group("NukeMCP: set_viewer_input"):
         viewer.setInput(input_index, node)
 
     return {

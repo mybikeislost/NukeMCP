@@ -1,23 +1,27 @@
+import asyncio
 import os
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp import Context, FastMCP
 from mcp.server.fastmcp.utilities.types import Image
 
 from nukemcp.connection import send_request
 
+_POLL_INTERVAL_SECONDS = 1.5
+
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool()
-    def render(
+    async def render(
         node_name: str | None = None,
         first_frame: int | None = None,
         last_frame: int | None = None,
         frame_range: str | None = None,
         proxy_mode: bool = False,
+        ctx: Context | None = None,
     ) -> dict:
         """Render a frame range. Can legitimately take a long time for large
-        ranges or heavy comps -- this call blocks until the render finishes
-        or the connection times out.
+        ranges or heavy comps -- progress is streamed as each frame completes
+        (MCP progress notifications) instead of blocking silently.
 
         Frame range can be specified in two ways:
           - first_frame + last_frame (e.g. first_frame=1, last_frame=10)
@@ -42,7 +46,29 @@ def register(mcp: FastMCP) -> None:
             params["last_frame"] = last_frame
         else:
             raise ValueError("provide frame_range or both first_frame and last_frame")
-        return send_request("render", params)
+
+        started = send_request("render_start", params)
+        job_id = started["job_id"]
+        total = started["total_frames"]
+
+        last_reported = -1
+        while True:
+            await asyncio.sleep(_POLL_INTERVAL_SECONDS)
+            status = send_request("render_status", {"job_id": job_id})
+            done = status["done"]
+            if ctx is not None and done != last_reported:
+                await ctx.report_progress(done, total)
+                await ctx.info("Rendered {}/{} frames".format(done, total))
+                last_reported = done
+            if status["status"] in ("done", "error"):
+                return {
+                    "success": status["success"],
+                    "error": status["error"],
+                    "stdout": status["stdout"],
+                    "stderr": status["stderr"],
+                    "segments_rendered": status.get("segments"),
+                    "proxy_mode": status.get("proxy_mode"),
+                }
 
     @mcp.tool()
     def get_node_screenshot(node_name: str, frame: int | None = None) -> Image:

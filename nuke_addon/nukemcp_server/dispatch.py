@@ -71,7 +71,7 @@ def _load_handlers():
 
 
 def _register_batch():
-    import nuke
+    from .nuke_compat import undo_group
 
     @register_handler("batch")
     def batch(params):
@@ -92,7 +92,7 @@ def _register_batch():
         results = []
         _batch_active = True
         try:
-            with nuke.UndoGroup("NukeMCP: {}".format(label)):
+            with undo_group("NukeMCP: {}".format(label)):
                 for op in operations:
                     tool_name = op.get("tool", "")
                     op_params = op.get("params") or {}

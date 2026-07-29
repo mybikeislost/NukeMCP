@@ -3,6 +3,7 @@ import os
 import nuke
 
 from ..dispatch import register_handler
+from ..nuke_compat import undo_group
 
 
 def _require_absolute(path):
@@ -14,6 +15,24 @@ def _require_absolute(path):
 def open_script(params):
     path = params["path"]
     _require_absolute(path)
+    dry_run = bool(params.get("dry_run", False))
+
+    if dry_run:
+        root = nuke.root()
+        modified = bool(root.modified())
+        return {
+            "dry_run": True,
+            "would_open": path,
+            "target_exists": os.path.exists(path),
+            "current_script": root.name() or None,
+            "current_script_modified": modified,
+            "current_node_count": len(nuke.allNodes()),
+            "warning": (
+                "opening will discard the current session -- unsaved changes will be lost"
+                if modified else None
+            ),
+        }
+
     # nuke.scriptOpen() always opens a NEW script containing the named file's
     # contents -- it replaces the current session by itself, there's no
     # separate "merge" behavior to opt out of.
@@ -40,7 +59,7 @@ def merge_script(params):
 
     nodes_before = {n.name() for n in nuke.allNodes()}
 
-    with nuke.UndoGroup("NukeMCP: merge_script"):
+    with undo_group("NukeMCP: merge_script"):
         nuke.scriptReadFile(path)
 
     nodes_after = {n.name() for n in nuke.allNodes()}

@@ -1,6 +1,7 @@
 import nuke
 
 from ..dispatch import register_handler
+from ..nuke_compat import undo_group
 
 
 def _require_node_and_knob(node_name, knob_name):
@@ -23,7 +24,7 @@ def set_knob_expression(params):
 
     _, knob = _require_node_and_knob(node_name, knob_name)
 
-    with nuke.UndoGroup("NukeMCP: set_knob_expression"):
+    with undo_group("NukeMCP: set_knob_expression"):
         if expression:
             if field_index is not None:
                 knob.setExpression(expression, int(field_index))
@@ -54,7 +55,7 @@ def set_knob_keyframe(params):
 
     _, knob = _require_node_and_knob(node_name, knob_name)
 
-    with nuke.UndoGroup("NukeMCP: set_knob_keyframe"):
+    with undo_group("NukeMCP: set_knob_keyframe"):
         knob.setAnimated() if field_index is None else knob.setAnimated(int(field_index))
         if field_index is not None:
             knob.setValueAt(value, frame, int(field_index))
@@ -79,7 +80,7 @@ def remove_knob_animation(params):
 
     _, knob = _require_node_and_knob(node_name, knob_name)
 
-    with nuke.UndoGroup("NukeMCP: remove_knob_animation"):
+    with undo_group("NukeMCP: remove_knob_animation"):
         if field_index is not None:
             knob.clearAnimated(int(field_index))
         else:

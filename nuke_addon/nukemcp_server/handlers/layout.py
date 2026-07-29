@@ -6,6 +6,7 @@ import ctypes
 import nuke
 
 from ..dispatch import register_handler
+from ..nuke_compat import undo_group
 
 # ---------------------------------------------------------------------------
 # Category definitions
@@ -120,7 +121,7 @@ def organize_node_graph(params):
 
     backdrops = []
 
-    with nuke.UndoGroup("NukeMCP: organize_node_graph"):
+    with undo_group("NukeMCP: organize_node_graph"):
         x_cursor = 0
 
         for cat in active_cats:

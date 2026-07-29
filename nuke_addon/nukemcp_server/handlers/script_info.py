@@ -1,6 +1,7 @@
 import nuke
 
 from ..dispatch import register_handler
+from ..nuke_compat import undo_group
 
 
 @register_handler("get_script_info")
@@ -27,7 +28,7 @@ def set_project_settings(params):
     root = nuke.root()
     changed = {}
 
-    with nuke.UndoGroup("NukeMCP: set_project_settings"):
+    with undo_group("NukeMCP: set_project_settings"):
         if "first_frame" in params:
             v = int(params["first_frame"])
             root["first_frame"].setValue(v)

@@ -63,14 +63,14 @@ All tools that modify the script (create, edit, delete, connect, animate, batch)
 
 | Tool | Params | Notes |
 |---|---|---|
-| `render` | `node_name?: str`, `first_frame?: int`, `last_frame?: int`, `frame_range?: str`, `proxy_mode?: bool` | Renders all Write nodes if `node_name` omitted. `frame_range` accepts compound specs like `"1-5,7,9-12"`. `proxy_mode=True` enables Nuke proxy for this render only. Blocks until done |
+| `render` | `node_name?: str`, `first_frame?: int`, `last_frame?: int`, `frame_range?: str`, `proxy_mode?: bool` | Renders all Write nodes if `node_name` omitted. `frame_range` accepts compound specs like `"1-5,7,9-12"`. `proxy_mode=True` enables Nuke proxy for this render only. Renders frame-by-frame and streams progress as MCP progress notifications instead of blocking silently |
 | `get_node_screenshot` | `node_name: str`, `frame?: int` | Renders one frame via a temporary Write node, returns it as an inline image |
 
 ## Script I/O
 
 | Tool | Params | Notes |
 |---|---|---|
-| `open_script` | `path: str` (absolute) | Replaces the current session — there is no merge option for `scriptOpen` |
+| `open_script` | `path: str` (absolute), `dry_run?: bool` | Replaces the current session — there is no merge option for `scriptOpen`. Pass `dry_run=True` to preview (target existence, whether the current session has unsaved changes) without opening anything |
 | `save_script` | `path: str` (absolute) | Result includes `overwrote_existing: bool` |
 | `merge_script` | `path: str` (absolute) | Import nodes from another .nk into the current script without replacing it |
 
