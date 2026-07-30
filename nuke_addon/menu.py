@@ -11,7 +11,15 @@ import nuke
 
 from nukemcp_server import listener
 
-_menu = nuke.menu("Nuke").addMenu("NukeMCP")
+_nuke_menu = nuke.menu("Nuke")
+
+# Insert NukeMCP just before "Help" so Help stays the last item on the menu
+# bar, matching Nuke's own convention. Falls back to appending at the end
+# (index=None) if "Help" isn't found for some reason.
+_help_index = next(
+    (i for i, item in enumerate(_nuke_menu.items()) if item.name() == "Help"), None
+)
+_menu = _nuke_menu.addMenu("NukeMCP", index=_help_index)
 _menu.addCommand("Start Server", listener.start_listener)
 _menu.addCommand("Stop Server", listener.stop_listener)
 _menu.addCommand("Status", listener.show_status)
