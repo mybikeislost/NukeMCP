@@ -8,3 +8,4 @@ __pycache__/
 *.autosave
 .claude/
 *.mcpb
+*IDEAS_*.md
