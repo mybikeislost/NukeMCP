@@ -33,11 +33,41 @@ def open_script(params):
             ),
         }
 
-    # nuke.scriptOpen() always opens a NEW script containing the named file's
-    # contents -- it replaces the current session by itself, there's no
-    # separate "merge" behavior to opt out of.
+    # scriptOpen() does not raise on a missing file. It logs "Can't read ...:
+    # No such file or directory" and then SETS root().name() TO THAT PATH,
+    # leaving an empty session named after a file that does not exist. So this
+    # returned {"opened": path} for a typo'd path -- and the verification below
+    # cannot catch it, because the name it checks is the one it wanted.
+    if not os.path.exists(path):
+        raise LookupError("no such file: {}".format(path))
+
+    # nuke.scriptOpen() replaces the session only when the session is UNMODIFIED.
+    # Over a modified one it SPAWNS A SECOND NUKE INSTANCE and loads the file
+    # there, leaving this session untouched -- and the new instance cannot bind
+    # the addon's port, so nothing can reach it. The call returns normally
+    # either way, so this reported success while nothing had changed.
+    #
+    # Clearing first gives scriptOpen nothing to preserve, so it loads in place.
+    # setModified(False) is NOT enough: measured, it still spawned a second
+    # instance. Discarding here matches what dry_run already warns about.
+    if nuke.root().modified():
+        nuke.scriptClear()
+
     nuke.scriptOpen(path)
-    return {"opened": path}
+
+    # Verify rather than assume: root().name() returns exactly the path passed
+    # to scriptOpen -- measured against symlinked, dotted and case-altered
+    # paths, none of which Nuke normalises -- so an inequality here means the
+    # open genuinely did not take effect on THIS session.
+    loaded = nuke.root().name() or ""
+    if os.path.normpath(loaded) != os.path.normpath(path):
+        raise RuntimeError(
+            "open did not take effect: this session is still {!r}, not {!r}. "
+            "Nuke may have opened the file in a separate instance, which the "
+            "addon cannot reach.".format(loaded or "untitled", path)
+        )
+
+    return {"opened": path, "node_count": len(nuke.allNodes())}
 
 
 @register_handler("save_script")
