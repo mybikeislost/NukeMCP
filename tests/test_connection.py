@@ -1,4 +1,5 @@
 import os
+import socket
 
 import pytest
 
@@ -43,9 +44,25 @@ def test_send_request_unknown_tool(fake_listener):
     assert exc_info.value.error_type == "UnknownToolError"
 
 
+def _closed_port():
+    """A port nothing is listening on, by construction.
+
+    Binding and immediately closing leaves the number free. A hardcoded number
+    carries an assumption the test cannot check: port 1, used here before,
+    accepts connections on at least one macOS machine, so the test failed with
+    "Invalid response" -- the client had connected and read nothing -- rather
+    than the refusal it was written to check.
+    """
+    sock = socket.socket()
+    sock.bind(("127.0.0.1", 0))
+    port = sock.getsockname()[1]
+    sock.close()
+    return port
+
+
 def test_connection_refused_when_nothing_listening():
     old_port = os.environ.get("NUKEMCP_PORT")
-    os.environ["NUKEMCP_PORT"] = "1"  # privileged/unused port, nothing listens here
+    os.environ["NUKEMCP_PORT"] = str(_closed_port())
     try:
         with pytest.raises(connection.NukeConnectionError) as exc_info:
             connection.send_request("get_script_info", {})
