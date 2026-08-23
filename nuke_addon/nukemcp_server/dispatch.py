@@ -57,6 +57,7 @@ def _load_handlers():
         diagnostics,
         execute,
         graph,
+        gsv,
         layout,
         nodes,
         templates,
